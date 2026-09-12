@@ -1,8 +1,11 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
 
-# Tiny Tapeout Verilog Project Template
+# SENT to I2C bridge
 
-- [Read the documentation for project](docs/info.md)
+Full-duplex SAE J2716 SENT decoder + encoder bridged to an I2C register-map slave (address
+0x50), targeting the IHP SG13G2 (130nm BiCMOS SiGe) Tiny Tapeout shuttle.
+
+- [Read the documentation for this project](docs/info.md)
 
 ## What is Tiny Tapeout?
 
