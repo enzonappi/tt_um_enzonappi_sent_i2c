@@ -122,10 +122,11 @@ async def i2c_write_byte(dut, bus, data):
     await i2c_delay(dut)
     bus.scl_drive_low = False
     bus.apply()
-    ack = bus.read_sda() == 0
     await i2c_delay(dut)
+    ack = bus.read_sda() == 0
     bus.scl_drive_low = True
     bus.apply()
+    await i2c_delay(dut)
     return ack
 
 
@@ -154,17 +155,21 @@ async def i2c_read_byte(dut, bus, nack):
 
 async def i2c_write_reg(dut, bus, ptr, value=None):
     await i2c_start(dut, bus)
-    await i2c_write_byte(dut, bus, (I2C_ADDR << 1) | 0)
-    await i2c_write_byte(dut, bus, ptr)
+    addr_ack = await i2c_write_byte(dut, bus, (I2C_ADDR << 1) | 0)
+    dut._log.info(f"i2c_write_reg(ptr={ptr:#x}): address+W ack={addr_ack}")
+    ptr_ack = await i2c_write_byte(dut, bus, ptr)
+    dut._log.info(f"i2c_write_reg(ptr={ptr:#x}): pointer byte ack={ptr_ack}")
     if value is not None:
-        await i2c_write_byte(dut, bus, value)
+        val_ack = await i2c_write_byte(dut, bus, value)
+        dut._log.info(f"i2c_write_reg(ptr={ptr:#x}): value byte ack={val_ack}")
     await i2c_stop(dut, bus)
 
 
 async def i2c_read_block(dut, bus, ptr, n):
     await i2c_write_reg(dut, bus, ptr)
     await i2c_start(dut, bus)  # repeated start
-    await i2c_write_byte(dut, bus, (I2C_ADDR << 1) | 1)
+    addr_ack = await i2c_write_byte(dut, bus, (I2C_ADDR << 1) | 1)
+    dut._log.info(f"i2c_read_block(ptr={ptr:#x}): address+R ack={addr_ack}")
     out = []
     for i in range(n):
         out.append(await i2c_read_byte(dut, bus, nack=(i == n - 1)))
