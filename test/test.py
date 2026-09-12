@@ -194,7 +194,7 @@ async def test_sent_i2c_bridge(dut):
     await send_sent_frame(dut, bus, status, data_nibbles)
     await ClockCycles(dut.clk, 20)
 
-    assert dut.uo_out.value & 0b0001, "new_data should be set after a decoded frame"
+    assert int(dut.uo_out.value) & 0b0001, "new_data should be set after a decoded frame"
 
     # --- read the frame back over I2C ---
     regs = await i2c_read_block(dut, bus, 0x00, 7)
