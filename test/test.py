@@ -192,6 +192,10 @@ async def test_sent_i2c_bridge(dut):
     status = 0x7
     data_nibbles = [0x1, 0x2, 0x3, 0x4, 0x5, 0x6]
     await send_sent_frame(dut, bus, status, data_nibbles)
+    # the decoder times each nibble (including CRC) by the falling edge that
+    # *follows* it, so it needs one more edge after the frame before it can
+    # latch -- a real bus would already be starting its next sync pulse here.
+    await sent_pulse(dut, bus, TICKS_SYNC * TICK_CYCLES)
     await ClockCycles(dut.clk, 20)
 
     assert int(dut.uo_out.value) & 0b0001, "new_data should be set after a decoded frame"
