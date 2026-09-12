@@ -128,6 +128,12 @@ async def i2c_write_byte(dut, bus, data):
         bus.scl_drive_low = False
         bus.apply()
         await i2c_delay(dut)
+        state = int(dut.user_project.u_i2c_slave.state.value)
+        bitcnt = int(dut.user_project.u_i2c_slave.bitcnt.value)
+        shreg_in = int(dut.user_project.u_i2c_slave.shreg_in.value)
+        dut._log.info(
+            f"wr bit{i}={(data >> i) & 1}: state={state} bitcnt={bitcnt} shreg_in={shreg_in:#04x}"
+        )
         bus.scl_drive_low = True
         bus.apply()
     bus.sda_drive_low = False
