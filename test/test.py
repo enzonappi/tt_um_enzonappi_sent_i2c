@@ -78,20 +78,33 @@ async def i2c_delay(dut):
     await ClockCycles(dut.clk, 8)
 
 
+def _dbg(dut, label):
+    dut._log.info(
+        f"{label}: ui_in={int(dut.ui_in.value):#04x} uio_in={int(dut.uio_in.value):#04x} "
+        f"uio_out={int(dut.uio_out.value):#04x} uio_oe={int(dut.uio_oe.value):#04x} "
+        f"busy={int(dut.user_project.u_i2c_slave.busy.value)} "
+        f"state={int(dut.user_project.u_i2c_slave.state.value)}"
+    )
+
+
 async def i2c_start(dut, bus):
     bus.scl_drive_low = True
     bus.sda_drive_low = False
     bus.apply()
     await i2c_delay(dut)
+    _dbg(dut, "start: scl_low")
     bus.scl_drive_low = False
     bus.apply()
     await i2c_delay(dut)
+    _dbg(dut, "start: scl_high (idle)")
     bus.sda_drive_low = True  # SDA falls while SCL high -> START
     bus.apply()
     await i2c_delay(dut)
+    _dbg(dut, "start: sda_low (start sent)")
     bus.scl_drive_low = True
     bus.apply()
     await i2c_delay(dut)
+    _dbg(dut, "start: scl_low again")
 
 
 async def i2c_stop(dut, bus):
