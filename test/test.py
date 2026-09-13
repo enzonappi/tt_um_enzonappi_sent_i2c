@@ -139,9 +139,17 @@ async def i2c_write_byte(dut, bus, data):
     bus.sda_drive_low = False
     bus.apply()
     await i2c_delay(dut)
+    sda_oe_lowphase = int(dut.user_project.u_i2c_slave.sda_oe.value)
+    state_ackphase = int(dut.user_project.u_i2c_slave.state.value)
+    dut._log.info(f"ack low-phase: sda_oe={sda_oe_lowphase} state={state_ackphase}")
     bus.scl_drive_low = False
     bus.apply()
     await i2c_delay(dut)
+    sda_oe_highphase = int(dut.user_project.u_i2c_slave.sda_oe.value)
+    dut._log.info(
+        f"ack high-phase: sda_oe={sda_oe_highphase} uio_oe={int(dut.uio_oe.value):#04x} "
+        f"uio_out={int(dut.uio_out.value):#04x} uio_in={int(dut.uio_in.value):#04x}"
+    )
     ack = bus.read_sda() == 0
     bus.scl_drive_low = True
     bus.apply()
