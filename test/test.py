@@ -9,7 +9,7 @@
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles
+from cocotb.triggers import ClockCycles, Timer
 
 CLK_PERIOD_NS = 100  # 10 MHz, matches the design's clk_hz assumption
 TICK_CYCLES = 30  # 3 us tick @ 10 MHz -> inside the default 1-6us sync window
@@ -56,6 +56,15 @@ class Bus:
             int(self.dut.uio_out.value) & 0b10
         )
         return 0 if (self.sda_drive_low or dut_pulls_sda_low) else 1
+
+    async def run(self):
+        # The DUT's own sda_oe changes on its own clock edges, independently
+        # of when the testbench happens to call apply() -- a real open-drain
+        # bus resolves continuously, so re-apply frequently instead of only
+        # at the specific moments the testbench changes its own drive.
+        while True:
+            self.apply()
+            await Timer(1, unit="ns")
 
 
 async def sent_pulse(dut, bus, total_cycles, low_cycles=5):
@@ -215,6 +224,7 @@ async def test_sent_i2c_bridge(dut):
     dut.ena.value = 1
     dut.ui_in.value = 1  # SENT idle-high
     dut.uio_in.value = 0b11  # SCL/SDA idle-high (pulled up)
+    cocotb.start_soon(bus.run())
     dut.rst_n.value = 0
     await ClockCycles(dut.clk, 10)
     dut.rst_n.value = 1
