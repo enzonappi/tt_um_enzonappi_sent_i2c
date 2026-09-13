@@ -370,6 +370,10 @@ module tt_um_enzonappi_sent_i2c #(
     assign uio_out = {6'b0, 1'b0, 1'b0}; // open-drain: never actively drive high
     assign uio_oe  = {6'b0, sda_oe, 1'b0}; // uio[1]=SDA oe, uio[0]=SCL always input
 
+    // Silicon art: a dedication engraved on TopMetal1 (see ../macros/dedication.gds
+    // and src/dedication.v for the blackbox module declaration).
+    (* keep *) dedication ded();
+
     // silence unused-signal lint warnings without affecting synthesis
     wire _unused_ok = &{ena, ui_in[7:1], uio_in[7:2], 1'b0};
 

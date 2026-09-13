@@ -1,0 +1,31 @@
+# LEF file generated for dedication
+VERSION 5.8 ;
+NAMESCASESENSITIVE ON ;
+DIVIDERCHAR "/" ;
+BUSBITCHARS "[]" ;
+UNITS
+   DATABASE MICRONS 1000 ;
+END UNITS
+
+MACRO dedication
+   CLASS BLOCK ;
+   FOREIGN dedication 0 0 ;
+   SIZE 57.800 BY 24.400 ;
+   SYMMETRY X Y ;
+   OBS
+      LAYER Metal1 ;
+        RECT 0 0 57.800 24.400 ;
+      LAYER Metal2 ;
+        RECT 0 0 57.800 24.400 ;
+      LAYER Metal3 ;
+        RECT 0 0 57.800 24.400 ;
+      LAYER Metal4 ;
+        RECT 0 0 57.800 24.400 ;
+      LAYER Metal5 ;
+        RECT 0 0 57.800 24.400 ;
+      LAYER TopMetal1 ;
+        RECT 0 0 57.800 24.400 ;
+      LAYER TopMetal2 ;
+        RECT 0 0 57.800 24.400 ;
+   END
+END dedication

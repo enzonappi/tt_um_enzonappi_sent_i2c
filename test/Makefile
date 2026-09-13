@@ -6,7 +6,7 @@ SIM ?= icarus
 FST ?= -fst # Use more efficient FST format
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = divider.v sent_decoder.v sent_encoder.v i2c_slave.v tt_um_enzonappi_sent_i2c.v
+PROJECT_SOURCES = divider.v sent_decoder.v sent_encoder.v i2c_slave.v dedication.v tt_um_enzonappi_sent_i2c.v
 
 ifneq ($(GATES),yes)
 
@@ -23,6 +23,10 @@ COMPILE_ARGS    += -DFUNCTIONAL
 COMPILE_ARGS    += -DSIM
 VERILOG_SOURCES += $(PDK_ROOT)/ihp-sg13g2/libs.ref/sg13g2_io/verilog/sg13g2_io.v
 VERILOG_SOURCES += $(PDK_ROOT)/ihp-sg13g2/libs.ref/sg13g2_stdcell/verilog/sg13g2_stdcell.v
+
+# blackbox stub for the "dedication" silicon-art macro instantiated by the
+# gate-level netlist below (physical-only, no logic -- see src/dedication.v)
+VERILOG_SOURCES += $(SRC_DIR)/dedication.v
 
 # this gets copied in by the GDS action workflow
 VERILOG_SOURCES += $(PWD)/gate_level_netlist.v

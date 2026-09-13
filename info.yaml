@@ -21,6 +21,7 @@ project:
     - "sent_decoder.v"
     - "sent_encoder.v"
     - "i2c_slave.v"
+    - "dedication.v"
     - "tt_um_enzonappi_sent_i2c.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.

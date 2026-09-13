@@ -74,5 +74,22 @@
 
   "//": "This tile is ~226um tall; the 100um default legalization displacement",
   "//": "left some cells stranded near one end during detailed placement.",
-  "PL_MAX_DISPLACEMENT_Y": 250
+  "PL_MAX_DISPLACEMENT_Y": 250,
+
+  "//": "Silicon art: a small dedication engraved on TopMetal1 (see macros/dedication.gds).",
+  "MACROS": {
+    "dedication": {
+      "instances": {
+        "ded": {
+          "location": [55, 130],
+          "orientation": "N"
+        }
+      },
+      "gds": ["dir::../macros/dedication.gds"],
+      "lef": ["dir::../macros/dedication.lef"]
+    }
+  },
+  "IGNORE_DISCONNECTED_MODULES": ["dedication", "ded"],
+  "ERROR_ON_DISCONNECTED_PINS": false,
+  "LVS_IGNORE_CELLS": ["dedication", "ded"]
 }
