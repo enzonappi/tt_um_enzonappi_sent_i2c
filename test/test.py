@@ -28,6 +28,15 @@ def crc4(nibbles):
     return crc
 
 
+def _safe_int(logic_array):
+    """int(logic_array), but treat unresolved ('x'/'z', e.g. before reset)
+    bits as 0 instead of raising."""
+    try:
+        return int(logic_array)
+    except ValueError:
+        return 0
+
+
 class Bus:
     """Models the open-drain SENT + I2C wiring between the testbench (as
     SENT source + I2C master) and the DUT, the same way tb_sent_i2c.v does:
@@ -39,23 +48,22 @@ class Bus:
         self.scl_drive_low = False
         self.sda_drive_low = False
 
+    def _dut_pulls_sda_low(self):
+        return _safe_int(self.dut.uio_oe.value) & 0b10 and not (
+            _safe_int(self.dut.uio_out.value) & 0b10
+        )
+
     def apply(self):
         # ui_in[0] = SENT line: testbench is the only driver in this test
         self.dut.ui_in.value = 0 if self.sent_drive_low else 1
         # uio_in[0] = SCL: design never drives it (input only)
         scl = 0 if self.scl_drive_low else 1
         # uio_in[1] = SDA: wired-AND between us and the DUT's sda_oe
-        dut_pulls_sda_low = int(self.dut.uio_oe.value) & 0b10 and not (
-            int(self.dut.uio_out.value) & 0b10
-        )
-        sda = 0 if (self.sda_drive_low or dut_pulls_sda_low) else 1
+        sda = 0 if (self.sda_drive_low or self._dut_pulls_sda_low()) else 1
         self.dut.uio_in.value = (sda << 1) | scl
 
     def read_sda(self):
-        dut_pulls_sda_low = int(self.dut.uio_oe.value) & 0b10 and not (
-            int(self.dut.uio_out.value) & 0b10
-        )
-        return 0 if (self.sda_drive_low or dut_pulls_sda_low) else 1
+        return 0 if (self.sda_drive_low or self._dut_pulls_sda_low()) else 1
 
     async def run(self):
         # The DUT's own sda_oe changes on its own clock edges, independently
