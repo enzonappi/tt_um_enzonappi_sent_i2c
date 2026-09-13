@@ -95,33 +95,20 @@ async def i2c_delay(dut):
     await ClockCycles(dut.clk, 8)
 
 
-def _dbg(dut, label):
-    dut._log.info(
-        f"{label}: ui_in={int(dut.ui_in.value):#04x} uio_in={int(dut.uio_in.value):#04x} "
-        f"uio_out={int(dut.uio_out.value):#04x} uio_oe={int(dut.uio_oe.value):#04x} "
-        f"busy={int(dut.user_project.u_i2c_slave.busy.value)} "
-        f"state={int(dut.user_project.u_i2c_slave.state.value)}"
-    )
-
-
 async def i2c_start(dut, bus):
     bus.scl_drive_low = True
     bus.sda_drive_low = False
     bus.apply()
     await i2c_delay(dut)
-    _dbg(dut, "start: scl_low")
     bus.scl_drive_low = False
     bus.apply()
     await i2c_delay(dut)
-    _dbg(dut, "start: scl_high (idle)")
     bus.sda_drive_low = True  # SDA falls while SCL high -> START
     bus.apply()
     await i2c_delay(dut)
-    _dbg(dut, "start: sda_low (start sent)")
     bus.scl_drive_low = True
     bus.apply()
     await i2c_delay(dut)
-    _dbg(dut, "start: scl_low again")
 
 
 async def i2c_stop(dut, bus):
@@ -145,28 +132,14 @@ async def i2c_write_byte(dut, bus, data):
         bus.scl_drive_low = False
         bus.apply()
         await i2c_delay(dut)
-        state = int(dut.user_project.u_i2c_slave.state.value)
-        bitcnt = int(dut.user_project.u_i2c_slave.bitcnt.value)
-        shreg_in = int(dut.user_project.u_i2c_slave.shreg_in.value)
-        dut._log.info(
-            f"wr bit{i}={(data >> i) & 1}: state={state} bitcnt={bitcnt} shreg_in={shreg_in:#04x}"
-        )
         bus.scl_drive_low = True
         bus.apply()
-    bus.sda_drive_low = False
+    bus.sda_drive_low = False  # release SDA so the slave can drive ack/nack
     bus.apply()
     await i2c_delay(dut)
-    sda_oe_lowphase = int(dut.user_project.u_i2c_slave.sda_oe.value)
-    state_ackphase = int(dut.user_project.u_i2c_slave.state.value)
-    dut._log.info(f"ack low-phase: sda_oe={sda_oe_lowphase} state={state_ackphase}")
     bus.scl_drive_low = False
     bus.apply()
     await i2c_delay(dut)
-    sda_oe_highphase = int(dut.user_project.u_i2c_slave.sda_oe.value)
-    dut._log.info(
-        f"ack high-phase: sda_oe={sda_oe_highphase} uio_oe={int(dut.uio_oe.value):#04x} "
-        f"uio_out={int(dut.uio_out.value):#04x} uio_in={int(dut.uio_in.value):#04x}"
-    )
     ack = bus.read_sda() == 0
     bus.scl_drive_low = True
     bus.apply()
@@ -199,21 +172,17 @@ async def i2c_read_byte(dut, bus, nack):
 
 async def i2c_write_reg(dut, bus, ptr, value=None):
     await i2c_start(dut, bus)
-    addr_ack = await i2c_write_byte(dut, bus, (I2C_ADDR << 1) | 0)
-    dut._log.info(f"i2c_write_reg(ptr={ptr:#x}): address+W ack={addr_ack}")
-    ptr_ack = await i2c_write_byte(dut, bus, ptr)
-    dut._log.info(f"i2c_write_reg(ptr={ptr:#x}): pointer byte ack={ptr_ack}")
+    await i2c_write_byte(dut, bus, (I2C_ADDR << 1) | 0)
+    await i2c_write_byte(dut, bus, ptr)
     if value is not None:
-        val_ack = await i2c_write_byte(dut, bus, value)
-        dut._log.info(f"i2c_write_reg(ptr={ptr:#x}): value byte ack={val_ack}")
+        await i2c_write_byte(dut, bus, value)
     await i2c_stop(dut, bus)
 
 
 async def i2c_read_block(dut, bus, ptr, n):
     await i2c_write_reg(dut, bus, ptr)
     await i2c_start(dut, bus)  # repeated start
-    addr_ack = await i2c_write_byte(dut, bus, (I2C_ADDR << 1) | 1)
-    dut._log.info(f"i2c_read_block(ptr={ptr:#x}): address+R ack={addr_ack}")
+    await i2c_write_byte(dut, bus, (I2C_ADDR << 1) | 1)
     out = []
     for i in range(n):
         out.append(await i2c_read_byte(dut, bus, nack=(i == n - 1)))
