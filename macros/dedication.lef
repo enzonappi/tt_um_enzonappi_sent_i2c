@@ -10,22 +10,22 @@ END UNITS
 MACRO dedication
    CLASS BLOCK ;
    FOREIGN dedication 0 0 ;
-   SIZE 57.800 BY 24.400 ;
+   SIZE 21.400 BY 68.400 ;
    SYMMETRY X Y ;
    OBS
       LAYER Metal1 ;
-        RECT 0 0 57.800 24.400 ;
+        RECT 0 0 21.400 68.400 ;
       LAYER Metal2 ;
-        RECT 0 0 57.800 24.400 ;
+        RECT 0 0 21.400 68.400 ;
       LAYER Metal3 ;
-        RECT 0 0 57.800 24.400 ;
+        RECT 0 0 21.400 68.400 ;
       LAYER Metal4 ;
-        RECT 0 0 57.800 24.400 ;
+        RECT 0 0 21.400 68.400 ;
       LAYER Metal5 ;
-        RECT 0 0 57.800 24.400 ;
+        RECT 0 0 21.400 68.400 ;
       LAYER TopMetal1 ;
-        RECT 0 0 57.800 24.400 ;
+        RECT 0 0 21.400 68.400 ;
       LAYER TopMetal2 ;
-        RECT 0 0 57.800 24.400 ;
+        RECT 0 0 21.400 68.400 ;
    END
 END dedication
